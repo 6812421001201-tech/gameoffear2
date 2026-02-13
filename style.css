@@ -205,6 +205,62 @@ nav a:hover::after {
     box-shadow: 0 0 15px rgba(179, 0, 0, 0.7);
     transform: scale(1.03);
 }
+/* ============================= */
+/*        FORM INPUT STYLE       */
+/* ============================= */
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="file"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 15px;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    color: #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+/* Placeholder สีหม่น */
+input::placeholder {
+    color: #555;
+}
+
+/* เอฟเฟกต์ตอนโฟกัส */
+input:focus {
+    border-color: #b30000;
+    box-shadow: 0 0 12px rgba(179, 0, 0, 0.6);
+    background: #181818;
+}
+
+/* File input ปรับปุ่มเลือกไฟล์ */
+input[type="file"]::file-selector-button {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #ccc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: #1c0000;
+    border-color: #b30000;
+    color: #fff;
+}
+
+/* ปรับ preview รูป */
+#previewImage {
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    border: 1px solid #222;
+}
+
 
 /* ---------- FOOTER ---------- */
 footer {
@@ -214,3 +270,4 @@ footer {
     font-size: 14px;
     color: #666;
 }
+
