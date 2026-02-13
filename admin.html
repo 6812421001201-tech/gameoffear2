@@ -17,28 +17,61 @@
 
 <div class="container">
 
-    <h2>Add New Category</h2>
-    <input type="text" id="newCategory" placeholder="Category name">
-    <button class="search-btn" onclick="addCategory()">Add Category</button>
+    <!-- LOGIN SECTION -->
+    <div id="loginSection">
+        <h2>Admin Login</h2>
+        <input type="password" id="adminPassword" placeholder="Enter Password">
+        <button class="search-btn" onclick="login()">Login</button>
+    </div>
 
-    <hr style="margin:40px 0; border-color:#222;">
+    <!-- ADMIN CONTENT -->
+    <div id="adminContent" style="display:none;">
 
-    <h2>Add New Game</h2>
+        <h2>Add / Edit Game</h2>
 
-    <input type="text" id="gameName" placeholder="Game Name"><br><br>
-    <input type="text" id="gamePrice" placeholder="Price (THB)"><br><br>
-    <input type="text" id="gameImage" placeholder="Image URL or filename"><br><br>
+        <input type="hidden" id="editIndex">
 
-    <label>Select Categories:</label><br>
-    <div id="categoryCheckboxes"></div><br>
+        <input type="text" id="gameName" placeholder="Game Name"><br><br>
+        <input type="text" id="gamePrice" placeholder="Price (THB)"><br><br>
 
-    <button class="search-btn" onclick="addGame()">Add Game</button>
+        <input type="file" id="gameImageFile" accept="image/*"><br><br>
+        <img id="previewImage" style="width:200px; display:none; margin-bottom:20px; border-radius:6px;">
+
+        <label>Select Categories:</label><br>
+        <div id="categoryCheckboxes"></div><br>
+
+        <button class="search-btn" onclick="saveGame()">Save Game</button>
+
+        <hr style="margin:40px 0; border-color:#222;">
+
+        <h2>All Games</h2>
+        <div id="gameList"></div>
+
+    </div>
 
 </div>
 
+<footer>© 2026 Dark Game Store</footer>
+
 <script>
 
-// โหลดหมวดหมู่
+const ADMIN_PASSWORD = "1234"; // เปลี่ยนรหัสได้ตรงนี้
+let uploadedImageBase64 = "";
+
+/* LOGIN */
+function login() {
+    const pass = document.getElementById("adminPassword").value;
+    if (pass === ADMIN_PASSWORD) {
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("adminContent").style.display = "block";
+        loadCategories();
+        loadGames();
+    } else {
+        alert("Wrong Password");
+    }
+}
+
+/* LOAD CATEGORIES */
 function loadCategories() {
     const categories = JSON.parse(localStorage.getItem("categories")) || ["horror","psychological","indie"];
     const container = document.getElementById("categoryCheckboxes");
@@ -53,44 +86,124 @@ function loadCategories() {
     });
 }
 
-function addCategory() {
-    const newCat = document.getElementById("newCategory").value.toLowerCase();
-    if (!newCat) return;
+/* IMAGE UPLOAD */
+document.getElementById("gameImageFile").addEventListener("change", function(event) {
 
-    let categories = JSON.parse(localStorage.getItem("categories")) || [];
-    categories.push(newCat);
+    const file = event.target.files[0];
+    if (!file) return;
 
-    localStorage.setItem("categories", JSON.stringify(categories));
-    document.getElementById("newCategory").value = "";
-    loadCategories();
-}
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        uploadedImageBase64 = e.target.result;
+        const preview = document.getElementById("previewImage");
+        preview.src = uploadedImageBase64;
+        preview.style.display = "block";
+    };
 
-function addGame() {
+    reader.readAsDataURL(file);
+});
+
+/* SAVE GAME (ADD OR EDIT) */
+function saveGame() {
+
     const name = document.getElementById("gameName").value;
     const price = document.getElementById("gamePrice").value;
-    const image = document.getElementById("gameImage").value;
+    const editIndex = document.getElementById("editIndex").value;
 
     const selected = document.querySelectorAll("#categoryCheckboxes input:checked");
-
     let cats = [];
     selected.forEach(cb => cats.push(cb.value));
 
-    const newGame = {
+    if (!name || !price) {
+        alert("Please fill name and price");
+        return;
+    }
+
+    let games = JSON.parse(localStorage.getItem("games")) || [];
+
+    const gameData = {
         name,
         price,
-        image,
+        image: uploadedImageBase64 || (games[editIndex] ? games[editIndex].image : ""),
         categories: cats
     };
 
-    let games = JSON.parse(localStorage.getItem("games")) || [];
-    games.push(newGame);
+    if (editIndex === "") {
+        games.push(gameData);
+    } else {
+        games[editIndex] = gameData;
+    }
 
     localStorage.setItem("games", JSON.stringify(games));
 
-    alert("Game Added!");
+    resetForm();
+    loadGames();
 }
 
-loadCategories();
+/* LOAD GAME LIST */
+function loadGames() {
+
+    const games = JSON.parse(localStorage.getItem("games")) || [];
+    const container = document.getElementById("gameList");
+    container.innerHTML = "";
+
+    games.forEach((game, index) => {
+        container.innerHTML += `
+            <div class="card">
+                <img src="${game.image}" style="width:120px;"><br>
+                <strong>${game.name}</strong><br>
+                ${game.price} THB<br>
+                ${game.categories.join(", ")}<br><br>
+                <button onclick="editGame(${index})">Edit</button>
+                <button onclick="deleteGame(${index})" style="background:#800;">Delete</button>
+            </div>
+        `;
+    });
+}
+
+/* EDIT */
+function editGame(index) {
+    const games = JSON.parse(localStorage.getItem("games")) || [];
+    const game = games[index];
+
+    document.getElementById("gameName").value = game.name;
+    document.getElementById("gamePrice").value = game.price;
+    document.getElementById("editIndex").value = index;
+
+    uploadedImageBase64 = game.image;
+    const preview = document.getElementById("previewImage");
+    preview.src = game.image;
+    preview.style.display = "block";
+
+    const checkboxes = document.querySelectorAll("#categoryCheckboxes input");
+    checkboxes.forEach(cb => {
+        cb.checked = game.categories.includes(cb.value);
+    });
+}
+
+/* DELETE */
+function deleteGame(index) {
+    if (!confirm("Delete this game?")) return;
+
+    let games = JSON.parse(localStorage.getItem("games")) || [];
+    games.splice(index, 1);
+    localStorage.setItem("games", JSON.stringify(games));
+
+    loadGames();
+}
+
+/* RESET FORM */
+function resetForm() {
+    document.getElementById("gameName").value = "";
+    document.getElementById("gamePrice").value = "";
+    document.getElementById("editIndex").value = "";
+    document.getElementById("gameImageFile").value = "";
+    document.getElementById("previewImage").style.display = "none";
+    uploadedImageBase64 = "";
+
+    const checkboxes = document.querySelectorAll("#categoryCheckboxes input");
+    checkboxes.forEach(cb => cb.checked = false);
+}
 
 </script>
 
