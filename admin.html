@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="categories.html">Categories</a>
+        <a href="admin.html">Admin</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <h2>Add New Category</h2>
+    <input type="text" id="newCategory" placeholder="Category name">
+    <button class="search-btn" onclick="addCategory()">Add Category</button>
+
+    <hr style="margin:40px 0; border-color:#222;">
+
+    <h2>Add New Game</h2>
+
+    <input type="text" id="gameName" placeholder="Game Name"><br><br>
+    <input type="text" id="gamePrice" placeholder="Price (THB)"><br><br>
+    <input type="text" id="gameImage" placeholder="Image URL or filename"><br><br>
+
+    <label>Select Categories:</label><br>
+    <div id="categoryCheckboxes"></div><br>
+
+    <button class="search-btn" onclick="addGame()">Add Game</button>
+
+</div>
+
+<script>
+
+// โหลดหมวดหมู่
+function loadCategories() {
+    const categories = JSON.parse(localStorage.getItem("categories")) || ["horror","psychological","indie"];
+    const container = document.getElementById("categoryCheckboxes");
+    container.innerHTML = "";
+
+    categories.forEach(cat => {
+        container.innerHTML += `
+            <label>
+                <input type="checkbox" value="${cat}"> ${cat}
+            </label><br>
+        `;
+    });
+}
+
+function addCategory() {
+    const newCat = document.getElementById("newCategory").value.toLowerCase();
+    if (!newCat) return;
+
+    let categories = JSON.parse(localStorage.getItem("categories")) || [];
+    categories.push(newCat);
+
+    localStorage.setItem("categories", JSON.stringify(categories));
+    document.getElementById("newCategory").value = "";
+    loadCategories();
+}
+
+function addGame() {
+    const name = document.getElementById("gameName").value;
+    const price = document.getElementById("gamePrice").value;
+    const image = document.getElementById("gameImage").value;
+
+    const selected = document.querySelectorAll("#categoryCheckboxes input:checked");
+
+    let cats = [];
+    selected.forEach(cb => cats.push(cb.value));
+
+    const newGame = {
+        name,
+        price,
+        image,
+        categories: cats
+    };
+
+    let games = JSON.parse(localStorage.getItem("games")) || [];
+    games.push(newGame);
+
+    localStorage.setItem("games", JSON.stringify(games));
+
+    alert("Game Added!");
+}
+
+loadCategories();
+
+</script>
+
+</body>
+</html>

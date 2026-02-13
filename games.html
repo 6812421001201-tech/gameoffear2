@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Games</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="categories.html">Categories</a>
+        <a href="howtobuy.html">How to Buy</a>
+        <a href="admin.html">Admin</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <h2 id="pageTitle">All Games</h2>
+
+    <div id="gameContainer"></div>
+
+</div>
+
+<footer>© 2026 Dark Game Store</footer>
+
+<script>
+
+const urlParams = new URLSearchParams(window.location.search);
+const categoryParam = urlParams.get('category');
+const searchParam = urlParams.get('search');
+
+let selectedCategories = categoryParam ? categoryParam.split(",") : [];
+
+let games = JSON.parse(localStorage.getItem("games")) || [];
+
+const container = document.getElementById("gameContainer");
+const pageTitle = document.getElementById("pageTitle");
+
+if (selectedCategories.length > 0) {
+    pageTitle.innerText = "Category: " + selectedCategories.join(", ");
+}
+
+if (searchParam) {
+    pageTitle.innerText = "Search: " + searchParam;
+}
+
+if (games.length === 0) {
+    container.innerHTML = "<p>No games found. Add some from Admin panel.</p>";
+}
+
+games.forEach(game => {
+
+    let show = true;
+
+    // Filter by category
+    if (selectedCategories.length > 0) {
+        const match = selectedCategories.some(cat =>
+            game.categories.includes(cat)
+        );
+        if (!match) show = false;
+    }
+
+    // Filter by search
+    if (searchParam) {
+        if (!game.name.toLowerCase().includes(searchParam.toLowerCase())) {
+            show = false;
+        }
+    }
+
+    if (show) {
+        container.innerHTML += `
+            <div class="card game-card">
+                <img src="${game.image}" alt="${game.name}">
+                <div class="game-info">
+                    <h2>${game.name}</h2>
+                    <p>${game.categories.join(", ")} | ${game.price} THB</p>
+                    <button class="buy-btn">Buy</button>
+                </div>
+            </div>
+        `;
+    }
+
+});
+
+</script>
+
+</body>
+</html>

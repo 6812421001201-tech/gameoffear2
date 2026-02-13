@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Categories</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="categories.html">Categories</a>
+        <a href="howtobuy.html">How to Buy</a>
+        <a href="admin.html">Admin</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search game...">
+    </div>
+
+    <h2 class="category-title">Select Categories</h2>
+
+    <div class="category-list" id="categoryContainer"></div>
+
+    <button class="search-btn" onclick="applyFilter()">SEARCH</button>
+
+</div>
+
+<footer>© 2026 Dark Game Store</footer>
+
+<script>
+
+// โหลดหมวดหมู่
+const categories = JSON.parse(localStorage.getItem("categories")) || ["horror","psychological","indie"];
+const container = document.getElementById("categoryContainer");
+
+categories.forEach(cat => {
+    container.innerHTML += `
+        <label>
+            <input type="checkbox" value="${cat}"> ${cat}
+        </label><br>
+    `;
+});
+
+function applyFilter() {
+
+    const searchText = document.getElementById("searchInput").value;
+    const checked = document.querySelectorAll("#categoryContainer input:checked");
+
+    let selected = [];
+    checked.forEach(cb => selected.push(cb.value));
+
+    let url = "games.html?";
+
+    if (selected.length > 0) {
+        url += "category=" + selected.join(",");
+    }
+
+    if (searchText) {
+        if (selected.length > 0) url += "&";
+        url += "search=" + searchText;
+    }
+
+    window.location.href = url;
+}
+
+</script>
+
+</body>
+</html>
